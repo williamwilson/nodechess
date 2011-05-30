@@ -1,0 +1,126 @@
+<html>
+<head>
+  <title>nodechess</title>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+  <style type="text/css">
+    .sys { font-weight: bold; color: red; }
+    .chat { color: black; }
+
+    #chat { width: 600px; height: 200px; border: 1px solid black; margin-top: 20px; overflow: auto; }
+    #chat p:nth-child(odd) { background: #F6F6F6; }
+
+    #board { width: 400px; }
+    .darksquare { width: 50px; height: 50px; background-color: #333; float: left; }
+    .lightsquare { width: 50px; height: 50px; background-color: #fff; float: left; }
+
+    /* todo: create a sprite sheet and create a class for each piece (with the proper coordinates for the sprite) */
+  </style>
+  <script type="text/javascript">
+    var game;
+
+    $(document).ready(function() {
+      var rank, file, board, light;
+
+      /* wire up the 'submit' of the form to send a chat message */
+      $('#form').submit(function(eventObject) {
+        var val;
+
+        val = $('#text').val();
+        game.sendChat(val);
+        $('#text').val('').focus();
+        eventObject.preventDefault();
+      });
+      $('#form').bind('reset', function(eventObject) {
+        game.clearChat();
+        $('#text').focus();
+        eventObject.preventDefault();
+      });
+
+      /* initialize the board */
+      board = $('#board');
+      for (rank = 0; rank < 8; rank++) {
+        light = (rank % 2) === 0;
+	for (file = 0; file < 8; file++) {
+	  board.append('<div class="' + (light ? 'lightsquare' : 'darksquare') + '">' + rank + ', ' + file + '</div>');
+          light = !light;
+	}
+      }
+      board.append('<br style="clear: left;" />');
+    });
+
+    game = (function() {
+    var socket, processRefresh, processChat, esc, game;
+    game = {};
+    socket = new io.Socket(null, { port: 8080, rememberTransport: false });
+
+    socket.on('message', function(msg) {
+      if (!msg.hasOwnProperty('type')) {
+        /* invalid message, ignore it */
+        return;
+      }
+
+      switch (msg.type) {
+        case 'refresh':
+        processRefresh(msg);
+        break;
+        case 'chat':
+        processChat(msg);
+        break;
+      }
+    });
+
+    socket.on('connect', function() { processChat({ type: 'sys', message: { sender: 'System', message: 'Connected.' } }); });
+    socket.on('disconnect', function() { processChat({ type: 'sys', message: { sender: 'System', message: 'Disconnected.' } }); });
+    socket.on('reconnect', function() { processChat({ type: 'sys', message: { sender: 'System', message: 'Reconnected.' } }); });
+    socket.on('reconnecting', function(nextRetry) { processChat({ type: 'sys', message: { sender: 'System', message: 'Attempting to reconnect to the server.  Next attempt in ' + nextRetry + 'ms.' } }); });
+    socket.on('reconnect_failed', function() { processChat({ type: 'sys', message: { sender: 'System', message: 'Connection lost.' } }); });
+
+    esc = function(msg) {
+      return msg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    };
+
+    processChat = function(cmd) {
+      var nodeContent = '<p class="' + cmd.type + '" style="display:none;">';
+    
+      if ('message' in cmd) {
+        nodeContent += '<b>' + esc(cmd.message.sender) + '</b>: ' + esc(cmd.message.message);
+      }
+      nodeContent += '</p>';
+      $(nodeContent).appendTo('#chat').fadeIn(1000);
+
+      $('#chat').scrollTop(1000000);
+    };
+
+    processRefresh = function(msg) {
+      /* todo: process game board refresh */
+    };
+
+    game.clearChat = function() {
+      $('#chat').empty();
+    };
+
+    game.sendChat = function(msg) {
+      var cmd = { type: 'chat', message: { sender: 'you', message: msg } };
+      processChat(cmd);
+      socket.send(cmd);
+    };
+    
+    socket.connect();
+    return game;
+    }());
+  </script>
+</head>
+<body>
+  <h1>nodechess</h1>
+  <div id="board">
+  </div>
+  <form id="form">
+    <div id="chatroom">
+      <div id="chat">
+      </div>
+      <input id="text" type="text" autocomplete="off" /><input type="submit" value="send" /><input type="reset" value="clear" />
+    </div>
+  </form>
+</body>
+</html>
