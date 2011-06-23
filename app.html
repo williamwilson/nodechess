@@ -1,0 +1,169 @@
+<html>
+<head>
+  <title>nodechess</title>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.0/themes/trontastic/jquery-ui.css" />
+  <style type="text/css">
+    html {
+    background-color: #2e2e2e;
+    }
+
+    h1 {
+    color: #9fda58;
+    }
+    
+    .login {
+    width: 400px;
+    height: 120px;
+    margin-top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 10px;
+    text-align: center;
+    display:none;
+    }
+
+    .connect {
+    margin-top: 40px;
+    }
+
+    .board {
+    margin-left: auto;
+    margin-right: auto;
+    width: 24.0em;
+    height: 24.0em;
+    display: none;
+    border: 1.0em solid #888;
+    }
+
+    .square {
+    width: 3.0em;
+    height: 3.0em;
+    float: left;
+    position: relative;
+    }
+
+    .white {
+    background-color: #fff;
+    }
+
+    .black {
+    background-color: #666;
+    }
+
+    .highlight {
+    background-color: #9fda58;
+    }
+
+    .piece {
+    width: 45px;
+    height: 45px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -22px 0 0 -22px;
+    background-image: url('pieces.png');
+    }
+
+    .lightrook { background-position: 0px 0px; }
+    .darkrook { background-position: -45px 0px; }
+    .lightqueen { background-position: -90px 0px; }
+    .darkqueen { background-position: 0px -45px; }
+    .lightpawn { background-position: -45px -45px; }
+    .darkpawn { background-position: -90px -45px; }
+    .lightknight { background-position: 0px -90px; }
+    .darkknight { background-position: -45px -90px; }
+    .lightking { background-position: -90px -90px; }
+    .darkking { background-position: 0px -135px; }
+    .lightbishop { background-position: -45px -135px; }
+    .darkbishop { background-position: -90px -135px; }
+  </style>
+  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="nodechess.js"></script>
+</head>
+<body>
+  <h1>nodechess</h1>
+  <form id="form">
+    <div class="ui-widget-content ui-corner-all login">
+      <label for="username">Username</label>
+      <input type="text" id="username" />
+      <br />
+      <input type="submit" value="connect" id="connect" class="connect" />
+    </div>
+  </form>
+  <div class="board">
+    <div id="a8" class="square white"><div></div></div>
+    <div id="b8" class="square black"><div></div></div>
+    <div id="c8" class="square white"><div></div></div>
+    <div id="d8" class="square black"><div></div></div>
+    <div id="e8" class="square white"><div></div></div>
+    <div id="f8" class="square black"><div></div></div>
+    <div id="g8" class="square white"><div></div></div>
+    <div id="h8" class="square black"><div></div></div>
+
+    <div id="a7" class="square black"><div></div></div>
+    <div id="b7" class="square white"><div></div></div>
+    <div id="c7" class="square black"><div></div></div>
+    <div id="d7" class="square white"><div></div></div>
+    <div id="e7" class="square black"><div></div></div>
+    <div id="f7" class="square white"><div></div></div>
+    <div id="g7" class="square black"><div></div></div>
+    <div id="h7" class="square white"><div></div></div>
+
+    <div id="a6" class="square white"><div></div></div>
+    <div id="b6" class="square black"><div></div></div>
+    <div id="c6" class="square white"><div></div></div>
+    <div id="d6" class="square black"><div></div></div>
+    <div id="e6" class="square white"><div></div></div>
+    <div id="f6" class="square black"><div></div></div>
+    <div id="g6" class="square white"><div></div></div>
+    <div id="h6" class="square black"><div></div></div>
+
+    <div id="a5" class="square black"><div></div></div>
+    <div id="b5" class="square white"><div></div></div>
+    <div id="c5" class="square black"><div></div></div>
+    <div id="d5" class="square white"><div></div></div>
+    <div id="e5" class="square black"><div></div></div>
+    <div id="f5" class="square white"><div></div></div>
+    <div id="g5" class="square black"><div></div></div>
+    <div id="h5" class="square white"><div></div></div>
+
+    <div id="a4" class="square white"><div></div></div>
+    <div id="b4" class="square black"><div></div></div>
+    <div id="c4" class="square white"><div></div></div>
+    <div id="d4" class="square black"><div></div></div>
+    <div id="e4" class="square white"><div></div></div>
+    <div id="f4" class="square black"><div></div></div>
+    <div id="g4" class="square white"><div></div></div>
+    <div id="h4" class="square black"><div></div></div>
+
+    <div id="a3" class="square black"><div></div></div>
+    <div id="b3" class="square white"><div></div></div>
+    <div id="c3" class="square black"><div></div></div>
+    <div id="d3" class="square white"><div></div></div>
+    <div id="e3" class="square black"><div></div></div>
+    <div id="f3" class="square white"><div></div></div>
+    <div id="g3" class="square black"><div></div></div>
+    <div id="h3" class="square white"><div></div></div>
+
+    <div id="a2" class="square white"><div></div></div>
+    <div id="b2" class="square black"><div></div></div>
+    <div id="c2" class="square white"><div></div></div>
+    <div id="d2" class="square black"><div></div></div>
+    <div id="e2" class="square white"><div></div></div>
+    <div id="f2" class="square black"><div></div></div>
+    <div id="g2" class="square white"><div></div></div>
+    <div id="h2" class="square black"><div></div></div>
+
+    <div id="a1" class="square black"><div></div></div>
+    <div id="b1" class="square white"><div></div></div>
+    <div id="c1" class="square black"><div></div></div>
+    <div id="d1" class="square white"><div></div></div>
+    <div id="e1" class="square black"><div></div></div>
+    <div id="f1" class="square white"><div></div></div>
+    <div id="g1" class="square black"><div></div></div>
+    <div id="h1" class="square white"><div></div></div>
+  </div>
+</body>
+</html>
